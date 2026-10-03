@@ -240,6 +240,13 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             if (first_comment_indent_length == -1) {
                 first_comment_indent_length = (int32_t)indent_length;
             }
+            // Without indent/newline emission, dedent is the only possible token.
+            // The first comment's indentation already rules it out here.
+            if (!valid_symbols[INDENT] && !valid_symbols[NEWLINE] &&
+                scanner->indents.size > 0 &&
+                first_comment_indent_length >= (int32_t)*array_back(&scanner->indents)) {
+                return false;
+            }
             while (lexer->lookahead && lexer->lookahead != '\n') {
                 skip(lexer);
             }
